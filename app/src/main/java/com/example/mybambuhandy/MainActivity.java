@@ -21,6 +21,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,26 +54,29 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        Date currentDate = new Date();
+        // Форматирование времени как "день.месяц.год"
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String dateText = dateFormat.format(currentDate);
+
         try {
 
-            //byte[] bytes = new byte[(int) files[0].length()];
-            byte[] bytes = new byte[1024];
-            int[] IndexsUnsignedBytes = new int[1024];
-            File subFolder = new File(path);
 
+            int sizeFile = (int) files[0].length();
+            byte[] bytes = new byte[sizeFile];
+            int[] IndexsUnsignedBytes = new int[sizeFile];
+            int sizeUnsignedSymbols = 0;
+
+            File subFolder = new File(path);
             FileInputStream outputStream = new FileInputStream(new File(subFolder, "logger.log"));
 
             outputStream.read(bytes);
             outputStream.close();
 
-            int sizeUnsignedSymbols = 0;
-
-
-
-
-
-            for(int i =0; i<1024;i++){
+            //Получаем размер  для создания массива без отрицат.значений и без символа '/n'
+            for(int i =0; i<sizeFile;i++){
                 if((bytes[i]>=0)&& (bytes[i] != 10)){
+                    //IndexsUnsignedBytes - массив хранящий индексы массива bytes с полож.числами
                     IndexsUnsignedBytes[sizeUnsignedSymbols] = i;
                     sizeUnsignedSymbols++;
                 }
@@ -77,18 +84,18 @@ public class MainActivity extends AppCompatActivity {
 
             byte[] bytesUnsigned = new byte[sizeUnsignedSymbols];
 
-            for(int i = 0; i<sizeUnsignedSymbols;i++){
+            for(int i = 0; i < sizeUnsignedSymbols; i++){
                 bytesUnsigned[i] = bytes[IndexsUnsignedBytes[i]];
             }
 
             String string = new String(bytesUnsigned);
-
+            //Убираем лишние пробелы
             while(string.contains("  ")) {
                 String replace = string.replace("  ", " ");
                 string=replace;
             }
 
-            textView.setText(string);
+          //  textView.setText(string);
             Log.d(LOG_TAG, "Size: "+ (int) files[0].length());
            // Toast.makeText(getApplicationContext(), string, Toast.LENGTH_SHORT).show();
 
