@@ -28,7 +28,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    final String DIR_BAMBU_LOGS = "/Android/data/bbl.intl.bambulab.com/files/logger/logs";
+    final String DIR_BAMBU_LOGS = "/Android/data/bbl.intl.bambulab.com/files/logs/logger";
     final String LOG_TAG = "Files";
     TextView textView;
     @Override
@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             int sizeUnsignedSymbols = 0;
 
             File subFolder = new File(path);
-            FileInputStream outputStream = new FileInputStream(new File(subFolder, "logger.log"));
+            FileInputStream outputStream = new FileInputStream(new File(subFolder, "logger.0.log"));
 
             outputStream.read(bytes);
             outputStream.close();
@@ -104,6 +104,75 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e(TAG, e.toString());
         }
+
+    }
+
+    public void onClickLastLog(View view) {
+
+        String path = Environment.getExternalStorageDirectory().toString()+DIR_BAMBU_LOGS;
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        Log.d(LOG_TAG, "Size: "+ files.length);
+
+        int indexFileMinSize = files.length-1;
+        long size2;
+        long min = files[indexFileMinSize].length();
+        for (int i = indexFileMinSize; i > 0; i--) {
+
+            size2 = files[i-1].length();
+
+            if( min > size2 ){
+                min = size2;
+                indexFileMinSize = i-1;
+            }
+        }
+
+        String fileMinSize = files[indexFileMinSize].getName();
+        Log.d(LOG_TAG, "Name Files MinSize:" + fileMinSize);
+
+        try {
+
+            int sizeFile = (int) files[indexFileMinSize].length();
+            byte[] bytes = new byte[sizeFile];
+            int[] IndexsUnsignedBytes = new int[sizeFile];
+            int sizeUnsignedSymbols = 0;
+
+            File subFolder = new File(path);
+            FileInputStream outputStream = new FileInputStream(new File(subFolder, fileMinSize));
+
+            outputStream.read(bytes);
+            outputStream.close();
+
+            //Получаем размер  для создания массива без отрицат.значений и без символа '/n'
+            for(int i =0; i<sizeFile;i++){
+                if((bytes[i]>=0)&& (bytes[i] != 10)){
+                    //IndexsUnsignedBytes - массив хранящий индексы массива bytes с полож.числами
+                    IndexsUnsignedBytes[sizeUnsignedSymbols] = i;
+                    sizeUnsignedSymbols++;
+                }
+            }
+
+            byte[] bytesUnsigned = new byte[sizeUnsignedSymbols];
+
+            for(int i = 0; i < sizeUnsignedSymbols; i++){
+                bytesUnsigned[i] = bytes[IndexsUnsignedBytes[i]];
+            }
+
+            String string = new String(bytesUnsigned);
+            //Убираем лишние пробелы
+            while(string.contains("  ")) {
+                String replace = string.replace("  ", " ");
+                string=replace;
+            }
+
+            Log.d(LOG_TAG, "Size: "+ (int) files[indexFileMinSize].length());
+
+        } catch (FileNotFoundException e) {
+            Log.e("ERROR", e.toString());
+        } catch (IOException e) {
+            Log.e(TAG, e.toString());
+        }
+
 
     }
 }
