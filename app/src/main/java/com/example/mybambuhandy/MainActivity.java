@@ -23,7 +23,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         textView =findViewById(R.id.textView);
     }
 
-    public void onCclickBtnStart(View view) {
+    public void onClickBtnStart(View view) {
 
         String path = Environment.getExternalStorageDirectory().toString()+DIR_BAMBU_LOGS;
         File directory = new File(path);
@@ -62,13 +64,14 @@ public class MainActivity extends AppCompatActivity {
         try {
 
 
-            int sizeFile = (int) files[0].length();
+            int sizeFile = 20000;//(int) files[0].length();
+
             byte[] bytes = new byte[sizeFile];
             int[] IndexsUnsignedBytes = new int[sizeFile];
             int sizeUnsignedSymbols = 0;
 
             File subFolder = new File(path);
-            FileInputStream outputStream = new FileInputStream(new File(subFolder, "logger.0.log"));
+            FileInputStream outputStream = new FileInputStream(new File(subFolder, "logger.log"));
 
             outputStream.read(bytes);
             outputStream.close();
@@ -89,15 +92,31 @@ public class MainActivity extends AppCompatActivity {
             }
 
             String string = new String(bytesUnsigned);
-            //Убираем лишние пробелы
-            while(string.contains("  ")) {
-                String replace = string.replace("  ", " ");
-                string=replace;
-            }
 
-          //  textView.setText(string);
+            string = deleteLogMessage(string,"Pushing  TUTK  Received");
+            string = deleteLogMessage(string,"TUTK MediaStore Received");
+
+            int stringSize= string.length();
+            int j = 0;
+            int index = 0;
+            ArrayList<String> datesInLog = new ArrayList<>();
+
+            ArrayList<StateBambu> stateBambus = getListStateBambu("2024-09-03",string);
+/*
+            while(j<stringSize){
+                index = string.indexOf("2024-08-29",j);
+                if(index !=-1){
+                    String date = string.substring(index+10,index+23);
+                    j = index+23;
+                    datesInLog.add(date);
+                }   else break;
+            }
+*/
+
+
+            textView.setText(String.valueOf(index));
             Log.d(LOG_TAG, "Size: "+ (int) files[0].length());
-           // Toast.makeText(getApplicationContext(), string, Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getApplicationContext(), string, Toast.LENGTH_SHORT).show();
 
         } catch (FileNotFoundException e) {
             Log.e("ERROR", e.toString());
@@ -107,8 +126,107 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public String deleteLogMessage (String editStr, String nameLogMessage){
+
+        int indexPushing = 0;
+        int countScobkaStart = 0;
+        int countScobkaEnd = 0;
+        int fromIndex = 0;
+        StringBuilder myString = new StringBuilder(editStr);
+        boolean flagDoFor;
+        while(true) {
+
+            flagDoFor = true;
+            indexPushing = myString.indexOf(nameLogMessage,fromIndex);
+
+            if(indexPushing == -1) break;
+
+            for(int i = indexPushing;(flagDoFor == true) && (i < editStr.length()-1) ; i++ ){
+
+                switch (editStr.charAt(i)){
+                    case '{':countScobkaStart++;break;
+                    case '}':
+                        countScobkaEnd++;
+                        if(countScobkaEnd == countScobkaStart){
+                            fromIndex = i;
+                            flagDoFor = false;
+                        }
+                        break;
+                }
+                myString.setCharAt(i, ' ');
+
+            }
+        }
+
+
+        editStr = myString.toString();
+
+        //Убираем лишние пробелы
+        while(editStr.contains("  ")) {
+            String replace = editStr.replace("  ", " ");
+            editStr=replace;
+        }
+
+        return editStr;
+    }
+
+    public ArrayList<StateBambu> getListStateBambu(String date_y_m_d,String str){
+
+        ArrayList<StateBambu> stateBambuArrayList = new ArrayList<>();
+
+        int stringSize = str.length();
+        int j = 0;
+        int index = 0;
+
+        while(j<stringSize){
+            index = str.indexOf(date_y_m_d,j);
+            if(index !=-1){
+                StateBambu stateBambu = new StateBambu();
+
+                String date = str.substring(index+10,index+23);
+                j = index+23;
+
+                stateBambu.setDateStr_h_m_s_ms(date);
+                stateBambuArrayList.add(stateBambu);
+            }   else break;
+        }
+
+
+        return stateBambuArrayList;
+    }
+
+    public ArrayList<StateBambu> getListStateBambuLastLog(String date_y_m_d,String str){
+
+        ArrayList<StateBambu> stateBambuArrayList = new ArrayList<>();
+
+        int index = str.indexOf(date_y_m_d);
+        if(index !=-1){
+            StateBambu stateBambu = new StateBambu();
+            String temp = str.substring(index+10,index+23);
+
+            stateBambu.setDateStr_h_m_s_ms(temp);
+
+            index = str.indexOf("nozzle_temper");
+
+            if(index != -1){
+                int indexComma = str.indexOf(",",index);
+                temp = str.substring(index+16,indexComma);
+                float f = Float.parseFloat(temp);
+                int t = (int) f;
+                stateBambu.setNozzle_temper(t);
+            }
+            stateBambuArrayList.add(stateBambu);
+
+        }
+
+        return stateBambuArrayList;
+    }
+
+
+
     public void onClickLastLog(View view) {
 
+        long time = System.currentTimeMillis();
         String path = Environment.getExternalStorageDirectory().toString()+DIR_BAMBU_LOGS;
         File directory = new File(path);
         File[] files = directory.listFiles();
@@ -128,14 +246,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String fileMinSize = files[indexFileMinSize].getName();
+
         Log.d(LOG_TAG, "Name Files MinSize:" + fileMinSize);
+        Log.d(LOG_TAG, "Time search minFile:" + String.valueOf(System.currentTimeMillis()-time ) );
 
         try {
 
+            time = System.currentTimeMillis();
             int sizeFile = (int) files[indexFileMinSize].length();
             byte[] bytes = new byte[sizeFile];
-            int[] IndexsUnsignedBytes = new int[sizeFile];
-            int sizeUnsignedSymbols = 0;
+            int[] IndexsGoodBytes = new int[sizeFile];
+            int sizeGoodSymbols = 0;
 
             File subFolder = new File(path);
             FileInputStream outputStream = new FileInputStream(new File(subFolder, fileMinSize));
@@ -143,19 +264,19 @@ public class MainActivity extends AppCompatActivity {
             outputStream.read(bytes);
             outputStream.close();
 
-            //Получаем размер  для создания массива без отрицат.значений и без символа '/n'
+            //Получаем размер  для создания массива без  не нужных значений  без символов '/n' '/r'
             for(int i =0; i<sizeFile;i++){
-                if((bytes[i]>=0)&& (bytes[i] != 10)){
+                if((bytes[i] != 63) && (bytes[i] != 10) && (bytes[i] != 13)){
                     //IndexsUnsignedBytes - массив хранящий индексы массива bytes с полож.числами
-                    IndexsUnsignedBytes[sizeUnsignedSymbols] = i;
-                    sizeUnsignedSymbols++;
+                    IndexsGoodBytes[sizeGoodSymbols] = i;
+                    sizeGoodSymbols++;
                 }
             }
 
-            byte[] bytesUnsigned = new byte[sizeUnsignedSymbols];
+            byte[] bytesUnsigned = new byte[sizeGoodSymbols];
 
-            for(int i = 0; i < sizeUnsignedSymbols; i++){
-                bytesUnsigned[i] = bytes[IndexsUnsignedBytes[i]];
+            for(int i = 0; i < sizeGoodSymbols; i++){
+                bytesUnsigned[i] = bytes[IndexsGoodBytes[i]];
             }
 
             String string = new String(bytesUnsigned);
@@ -165,6 +286,16 @@ public class MainActivity extends AppCompatActivity {
                 string=replace;
             }
 
+            //Ищем с конца строку лога с полезной инфой
+            int indexStartStrLastLog = string.lastIndexOf("Pushing Status");
+            int indexEndStrLastLog = string.lastIndexOf("new_ver_list");
+            String subStr = string.substring(indexStartStrLastLog,indexEndStrLastLog);
+
+            //ArrayList<StateBambu> stateBambus = getListStateBambuLastLog("2024-09-03",subStr);
+
+            HashMap<String,ValueBambu> bambuHashMap = getHashMapBanbuLastLog("2024-09-03",subStr);
+
+            Log.d(LOG_TAG, "Time Parser file:" + String.valueOf(System.currentTimeMillis()-time ) );
             Log.d(LOG_TAG, "Size: "+ (int) files[indexFileMinSize].length());
 
         } catch (FileNotFoundException e) {
@@ -174,5 +305,97 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    private HashMap<String, ValueBambu> getHashMapBanbuLastLog(String date_y_m_d, String subStr) {
+        HashMap<String, ValueBambu> valueBambuHashMap = new HashMap<>();
+
+        int index;
+        //key местами не менять
+        final int indexNozzleTemper = 4;
+
+        String[] keys ={"hour_min_sec_ms",
+                "gcode_state",
+                "subtask_name",
+                "wifi_signal",
+                "nozzle_temper",
+                "nozzle_target_temper",
+                "bed_temper",
+                "bed_target_temper",
+                "mc_percent",
+                "mc_remaining_time",
+                "spd_mag",
+                "print_error",
+                "layer_num",
+                "total_layer_num"
+        };
+
+        //Инициализация valueBambuHashMap
+        for (String key:keys) {
+            valueBambuHashMap.put(key,new ValueBambu(null,-1));
+        }
+
+        //Записываем дату в формате String например 14:59:40.748 и перевод в милисекунді
+        index = subStr.indexOf(date_y_m_d);
+        if(index !=-1) {
+            String date = subStr.substring(index + 11, index + 23);
+            //14:59:40.748
+            int hour = Integer.parseInt(date.substring(0,2));
+            int minute = Integer.parseInt(date.substring(3,5));
+            int seconds = Integer.parseInt(date.substring(6,8));
+            int mSeconds = Integer.parseInt(date.substring(9));
+            int time_ms = mSeconds + seconds*1000 + minute*60000 + hour*3600000;
+            valueBambuHashMap.put("hour_min_sec_ms",new ValueBambu(date,time_ms));
+        }
+
+        //Записываем gcode_state: NO_STATE 'N';RUNNING 'R'; PAUSE 'P'; FINISH 'F'
+        index = subStr.indexOf("gcode_state");
+        if(index != -1){
+            int indexStart = subStr.indexOf(" ",index) +2;
+            int indexEnd = subStr.indexOf('"',indexStart+1);
+            String gcodeState = subStr.substring(indexStart,indexEnd);
+            int temp = (int) gcodeState.charAt(0);
+            valueBambuHashMap.put("gcode_state",new ValueBambu(gcodeState,temp));
+        }
+        //Записываем имя файла что идет на печать
+        index = subStr.indexOf("subtask_name");
+        if(index != -1){
+            int indexStart = subStr.indexOf(" ",index) +2;
+            int indexEnd = subStr.indexOf('"',indexStart+1) ;
+            String subTaskName = subStr.substring(indexStart,indexEnd);
+            int temp = (int) subTaskName.charAt(0);
+            valueBambuHashMap.put("subtask_name",new ValueBambu(subTaskName,temp));
+        }
+        //Записывам уровень wi-fi сигнала
+        index = subStr.indexOf("wifi_signal");
+        if(index != -1){
+            int indexStart = subStr.indexOf("-",index) +1;
+            int indexEnd = subStr.indexOf("d",indexStart) ;
+            String wifiSignal = subStr.substring(indexStart,indexEnd);
+            int temp = Integer.parseInt(wifiSignal);
+            valueBambuHashMap.put("wifi_signal",new ValueBambu(wifiSignal,temp));
+        }
+
+        //Запись остальных value
+
+        for(int i = indexNozzleTemper; i<keys.length;i++){
+            putValueToBambuHashMap(valueBambuHashMap,subStr,keys[i]);
+        }
+
+
+        return valueBambuHashMap;
+    }
+
+    private void putValueToBambuHashMap(HashMap<String, ValueBambu> valueBambuHashMap,String subStr, String key) {
+
+        int index = subStr.indexOf(key);
+        if(index != -1){
+            int indexStart = subStr.indexOf(" ",index)+1;
+            int indexEnd = subStr.indexOf(",",indexStart+1);
+            String str = subStr.substring(indexStart,indexEnd);
+            float f = Float.parseFloat(str);
+
+            valueBambuHashMap.put(key, new ValueBambu(str,(int)f));
+        }
     }
 }
