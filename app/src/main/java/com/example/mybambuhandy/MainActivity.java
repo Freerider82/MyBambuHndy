@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             int index = 0;
             ArrayList<String> datesInLog = new ArrayList<>();
 
-            ArrayList<StateBambu> stateBambus = getListStateBambu("2024-09-03",string);
+           // ArrayList<StateBambu> stateBambus = getListStateBambu("2024-09-03",string);
 /*
             while(j<stringSize){
                 index = string.indexOf("2024-08-29",j);
@@ -170,57 +170,9 @@ public class MainActivity extends AppCompatActivity {
         return editStr;
     }
 
-    public ArrayList<StateBambu> getListStateBambu(String date_y_m_d,String str){
-
-        ArrayList<StateBambu> stateBambuArrayList = new ArrayList<>();
-
-        int stringSize = str.length();
-        int j = 0;
-        int index = 0;
-
-        while(j<stringSize){
-            index = str.indexOf(date_y_m_d,j);
-            if(index !=-1){
-                StateBambu stateBambu = new StateBambu();
-
-                String date = str.substring(index+10,index+23);
-                j = index+23;
-
-                stateBambu.setDateStr_h_m_s_ms(date);
-                stateBambuArrayList.add(stateBambu);
-            }   else break;
-        }
 
 
-        return stateBambuArrayList;
-    }
 
-    public ArrayList<StateBambu> getListStateBambuLastLog(String date_y_m_d,String str){
-
-        ArrayList<StateBambu> stateBambuArrayList = new ArrayList<>();
-
-        int index = str.indexOf(date_y_m_d);
-        if(index !=-1){
-            StateBambu stateBambu = new StateBambu();
-            String temp = str.substring(index+10,index+23);
-
-            stateBambu.setDateStr_h_m_s_ms(temp);
-
-            index = str.indexOf("nozzle_temper");
-
-            if(index != -1){
-                int indexComma = str.indexOf(",",index);
-                temp = str.substring(index+16,indexComma);
-                float f = Float.parseFloat(temp);
-                int t = (int) f;
-                stateBambu.setNozzle_temper(t);
-            }
-            stateBambuArrayList.add(stateBambu);
-
-        }
-
-        return stateBambuArrayList;
-    }
 
 
 
