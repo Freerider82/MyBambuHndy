@@ -2,6 +2,7 @@ package com.example.mybambuhandy;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -14,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
+import org.parceler.Parcels;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -186,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 String date = str.substring(index+10,index+23);
                 j = index+23;
 
-                stateBambu.setDateStr_h_m_s_ms(date);
+               // stateBambu.setDateStr_h_m_s_ms(date);
                 stateBambuArrayList.add(stateBambu);
             }   else break;
         }
@@ -204,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
             StateBambu stateBambu = new StateBambu();
             String temp = str.substring(index+10,index+23);
 
-            stateBambu.setDateStr_h_m_s_ms(temp);
+            //stateBambu.setDateStr_h_m_s_ms(temp);
 
             index = str.indexOf("nozzle_temper");
 
@@ -213,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
                 temp = str.substring(index+16,indexComma);
                 float f = Float.parseFloat(temp);
                 int t = (int) f;
-                stateBambu.setNozzle_temper(t);
+                //stateBambu.setNozzle_temper(t);
             }
             stateBambuArrayList.add(stateBambu);
 
@@ -293,7 +296,20 @@ public class MainActivity extends AppCompatActivity {
 
             //ArrayList<StateBambu> stateBambus = getListStateBambuLastLog("2024-09-03",subStr);
 
-            HashMap<String,ValueBambu> bambuHashMap = getHashMapBanbuLastLog("2024-09-03",subStr);
+
+
+
+            Intent intent = new Intent(MainActivity.this,ValueBambuActivity.class);
+
+            intent.putExtra("SubString",subStr);
+
+            //Bundle bundle = new Bundle();
+            //bundle.putParcelable("BambuHashMap", Parcels.wrap(stateBambu));
+            //intent.putExtras(bundle);
+
+            //bundle.putParcelable("BambuHashMap", Parcels.wrap(bambuHashMap));
+            //intent.putExtra("BambuHashMap",bambuHashMap);
+            startActivity(intent);
 
             Log.d(LOG_TAG, "Time Parser file:" + String.valueOf(System.currentTimeMillis()-time ) );
             Log.d(LOG_TAG, "Size: "+ (int) files[indexFileMinSize].length());
@@ -307,95 +323,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private HashMap<String, ValueBambu> getHashMapBanbuLastLog(String date_y_m_d, String subStr) {
-        HashMap<String, ValueBambu> valueBambuHashMap = new HashMap<>();
-
-        int index;
-        //key местами не менять
-        final int indexNozzleTemper = 4;
-
-        String[] keys ={"hour_min_sec_ms",
-                "gcode_state",
-                "subtask_name",
-                "wifi_signal",
-                "nozzle_temper",
-                "nozzle_target_temper",
-                "bed_temper",
-                "bed_target_temper",
-                "mc_percent",
-                "mc_remaining_time",
-                "spd_mag",
-                "print_error",
-                "layer_num",
-                "total_layer_num"
-        };
-
-        //Инициализация valueBambuHashMap
-        for (String key:keys) {
-            valueBambuHashMap.put(key,new ValueBambu(null,-1));
-        }
-
-        //Записываем дату в формате String например 14:59:40.748 и перевод в милисекунді
-        index = subStr.indexOf(date_y_m_d);
-        if(index !=-1) {
-            String date = subStr.substring(index + 11, index + 23);
-            //14:59:40.748
-            int hour = Integer.parseInt(date.substring(0,2));
-            int minute = Integer.parseInt(date.substring(3,5));
-            int seconds = Integer.parseInt(date.substring(6,8));
-            int mSeconds = Integer.parseInt(date.substring(9));
-            int time_ms = mSeconds + seconds*1000 + minute*60000 + hour*3600000;
-            valueBambuHashMap.put("hour_min_sec_ms",new ValueBambu(date,time_ms));
-        }
-
-        //Записываем gcode_state: NO_STATE 'N';RUNNING 'R'; PAUSE 'P'; FINISH 'F'
-        index = subStr.indexOf("gcode_state");
-        if(index != -1){
-            int indexStart = subStr.indexOf(" ",index) +2;
-            int indexEnd = subStr.indexOf('"',indexStart+1);
-            String gcodeState = subStr.substring(indexStart,indexEnd);
-            int temp = (int) gcodeState.charAt(0);
-            valueBambuHashMap.put("gcode_state",new ValueBambu(gcodeState,temp));
-        }
-        //Записываем имя файла что идет на печать
-        index = subStr.indexOf("subtask_name");
-        if(index != -1){
-            int indexStart = subStr.indexOf(" ",index) +2;
-            int indexEnd = subStr.indexOf('"',indexStart+1) ;
-            String subTaskName = subStr.substring(indexStart,indexEnd);
-            int temp = (int) subTaskName.charAt(0);
-            valueBambuHashMap.put("subtask_name",new ValueBambu(subTaskName,temp));
-        }
-        //Записывам уровень wi-fi сигнала
-        index = subStr.indexOf("wifi_signal");
-        if(index != -1){
-            int indexStart = subStr.indexOf("-",index) +1;
-            int indexEnd = subStr.indexOf("d",indexStart) ;
-            String wifiSignal = subStr.substring(indexStart,indexEnd);
-            int temp = Integer.parseInt(wifiSignal);
-            valueBambuHashMap.put("wifi_signal",new ValueBambu(wifiSignal,temp));
-        }
-
-        //Запись остальных value
-
-        for(int i = indexNozzleTemper; i<keys.length;i++){
-            putValueToBambuHashMap(valueBambuHashMap,subStr,keys[i]);
-        }
 
 
-        return valueBambuHashMap;
-    }
 
-    private void putValueToBambuHashMap(HashMap<String, ValueBambu> valueBambuHashMap,String subStr, String key) {
-
-        int index = subStr.indexOf(key);
-        if(index != -1){
-            int indexStart = subStr.indexOf(" ",index)+1;
-            int indexEnd = subStr.indexOf(",",indexStart+1);
-            String str = subStr.substring(indexStart,indexEnd);
-            float f = Float.parseFloat(str);
-
-            valueBambuHashMap.put(key, new ValueBambu(str,(int)f));
-        }
-    }
 }

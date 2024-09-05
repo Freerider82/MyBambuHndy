@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="409dp"
+        android:layout_height="729dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.52"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
+
+        <TextView
+            android:id="@+id/textViewTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Time:" />
+
+        <TextView
+            android:id="@+id/textViewBambuWork"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BambuWork:" />
+
+        <TextView
+            android:id="@+id/textViewFileName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="File Name:" />
+
+        <TextView
+            android:id="@+id/textViewWIFI"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="WIFI:" />
+
+        <TextView
+            android:id="@+id/textViewNozzle_temper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="nozzle_temper:" />
+
+        <TextView
+            android:id="@+id/textViewNozzle_target_temper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="nozzle_target_temper:" />
+
+        <TextView
+            android:id="@+id/textViewBed_temper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="bed_temper:" />
+
+        <TextView
+            android:id="@+id/textViewBed_target_temper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="bed_target_temper:" />
+
+        <TextView
+            android:id="@+id/textViewMc_percent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="mc_percent:" />
+
+        <TextView
+            android:id="@+id/textViewMc_remaining_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="mc_remaining_time:" />
+
+        <TextView
+            android:id="@+id/textViewSpd_mag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="spd_mag:" />
+
+        <TextView
+            android:id="@+id/textViewPrint_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="print_error:" />
+
+        <TextView
+            android:id="@+id/textViewLayer_num"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="layer_num:" />
+
+        <TextView
+            android:id="@+id/textViewTotal_layer_num"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="total_layer_num:" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
