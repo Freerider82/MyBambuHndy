@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 String date = str.substring(index+10,index+23);
                 j = index+23;
 
-                stateBambu.setDateStr_h_m_s_ms(date);
+              //  stateBambu.setDateStr_h_m_s_ms(date);
                 stateBambuArrayList.add(stateBambu);
             }   else break;
         }
@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
             StateBambu stateBambu = new StateBambu();
             String temp = str.substring(index+10,index+23);
 
-            stateBambu.setDateStr_h_m_s_ms(temp);
+           // stateBambu.setDateStr_h_m_s_ms(temp);
 
             index = str.indexOf("nozzle_temper");
 
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
                 temp = str.substring(index+16,indexComma);
                 float f = Float.parseFloat(temp);
                 int t = (int) f;
-                stateBambu.setNozzle_temper(t);
+             //   stateBambu.setNozzle_temper(t);
             }
             stateBambuArrayList.add(stateBambu);
 
