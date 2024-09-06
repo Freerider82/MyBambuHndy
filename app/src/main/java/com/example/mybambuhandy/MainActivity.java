@@ -2,6 +2,7 @@ package com.example.mybambuhandy;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -293,7 +294,9 @@ public class MainActivity extends AppCompatActivity {
 
             //ArrayList<StateBambu> stateBambus = getListStateBambuLastLog("2024-09-03",subStr);
 
-            HashMap<String,ValueBambu> bambuHashMap = getHashMapBanbuLastLog("2024-09-03",subStr);
+            Intent intent = new Intent(MainActivity.this, ValueBambuActivity.class);
+            intent.putExtra("SubString",subStr);
+            startActivity(intent);
 
             Log.d(LOG_TAG, "Time Parser file:" + String.valueOf(System.currentTimeMillis()-time ) );
             Log.d(LOG_TAG, "Size: "+ (int) files[indexFileMinSize].length());
