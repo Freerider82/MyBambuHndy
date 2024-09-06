@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void onClickLastLog(View view) {
-
+/*
         long time = System.currentTimeMillis();
         String path = Environment.getExternalStorageDirectory().toString()+DIR_BAMBU_LOGS;
         File directory = new File(path);
@@ -274,13 +274,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            byte[] bytesUnsigned = new byte[sizeGoodSymbols];
+            byte[] bytesGood = new byte[sizeGoodSymbols];
 
             for(int i = 0; i < sizeGoodSymbols; i++){
-                bytesUnsigned[i] = bytes[IndexsGoodBytes[i]];
+                bytesGood[i] = bytes[IndexsGoodBytes[i]];
             }
 
-            String string = new String(bytesUnsigned);
+            String string = new String(bytesGood);
             //Убираем лишние пробелы
             while(string.contains("  ")) {
                 String replace = string.replace("  ", " ");
@@ -293,20 +293,10 @@ public class MainActivity extends AppCompatActivity {
             String subStr = string.substring(indexStartStrLastLog,indexEndStrLastLog);
 
             //ArrayList<StateBambu> stateBambus = getListStateBambuLastLog("2024-09-03",subStr);
-
+*/
             Intent intent = new Intent(MainActivity.this, ValueBambuActivity.class);
-            intent.putExtra("SubString",subStr);
+
             startActivity(intent);
-
-            Log.d(LOG_TAG, "Time Parser file:" + String.valueOf(System.currentTimeMillis()-time ) );
-            Log.d(LOG_TAG, "Size: "+ (int) files[indexFileMinSize].length());
-
-        } catch (FileNotFoundException e) {
-            Log.e("ERROR", e.toString());
-        } catch (IOException e) {
-            Log.e(TAG, e.toString());
-        }
-
 
     }
 

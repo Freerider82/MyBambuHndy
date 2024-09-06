@@ -23,7 +23,7 @@
             android:id="@+id/textViewTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Time:" />
+            android:text="@string/time" />
 
         <TextView
             android:id="@+id/textViewBambuWork"
@@ -102,5 +102,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="total_layer_num:" />
+
+        <TextView
+            android:id="@+id/textViewTest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test" />
+
+        <TextView
+            android:id="@+id/textViewTemp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Temp" />
+
+        <TextView
+            android:id="@+id/textViewTemp2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Temp2" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

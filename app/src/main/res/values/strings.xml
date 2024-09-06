@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MyBambuHandy</string>
+    <string name="time">Time:</string>
 </resources>
