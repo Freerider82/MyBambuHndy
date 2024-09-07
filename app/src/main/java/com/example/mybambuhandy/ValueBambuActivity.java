@@ -25,7 +25,7 @@ public class ValueBambuActivity extends AppCompatActivity {
     final String DIR_BAMBU_LOGS = "/Android/data/bbl.intl.bambulab.com/files/logs/logger";
     HashMap<String,ValueBambu> bambuHashMap;
     int indexFileMinSize,sizeFile;
-
+    String  fileMinSize;
     int temp2;
 
     final String[] keys ={"hour_min_sec_ms",
@@ -190,7 +190,6 @@ public class ValueBambuActivity extends AppCompatActivity {
                 File[] files = directory.listFiles();
                 int sizeGoodSymbols = 0;
                 long size2,min;
-                String fileMinSize;
                 while (is_started){
                     counter++;
                     Log.d(LOG_TAG, "Counter: "+  counter);
@@ -240,7 +239,7 @@ public class ValueBambuActivity extends AppCompatActivity {
                         }
 
 
-                        temp2 = bytesGood.length;
+
 
                         String string1 = new String(bytes);
                         String string = new String(bytesGood);
@@ -253,10 +252,10 @@ public class ValueBambuActivity extends AppCompatActivity {
 
                         //Ищем с конца строку лога с полезной инфой
                         int indexStartStrLastLog = string.lastIndexOf("Pushing Status");
-                        int indexEndStrLastLog = string.lastIndexOf("new_ver_list");
+                        int indexEndStrLastLog = string.lastIndexOf("ams");
                         String subStr = string.substring(indexStartStrLastLog,indexEndStrLastLog);
 
-                        bambuHashMap = getHashMapBanbuLastLog("2024-09-06",subStr);
+                        bambuHashMap = getHashMapBanbuLastLog("2024-09-07",subStr);
 
                         int x =0;
 
@@ -281,7 +280,7 @@ public class ValueBambuActivity extends AppCompatActivity {
 
                             textViewTest.setText(String.valueOf(counter));
                             textViewTemp.setText((String.valueOf(sizeFile)));
-                            textViewTemp2.setText(String.valueOf(temp2));
+                            textViewTemp2.setText(fileMinSize);
                         }
                     });
                     try {
