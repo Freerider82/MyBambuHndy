@@ -2,13 +2,19 @@ package com.example.mybambuhandy;
 
 import static android.content.ContentValues.TAG;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +32,8 @@ public class ValueBambuActivity extends AppCompatActivity {
     HashMap<String,ValueBambu> bambuHashMap;
     int indexFileMinSize,sizeFile;
     String  fileMinSize;
-    int temp2;
+    boolean subStringIsNormal = true;
+
 
     final String[] keys ={"hour_min_sec_ms",
             "gcode_state",
@@ -70,36 +77,20 @@ public class ValueBambuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_value);
 
 
-        String path = Environment.getExternalStorageDirectory().toString()+DIR_BAMBU_LOGS;
-
         textViewTest = findViewById(R.id.textViewTest);
         textViewTemp = findViewById(R.id.textViewTemp);
         textViewTemp2 = findViewById(R.id.textViewTemp2);
 
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-        scanFilesBambuLogs(directory);
+
 
         for (int i = 0; i < r_ids.length; i++){
             textViews[i] = findViewById(r_ids[i]);
         }
 
-
-        //textViewTime = findViewById(R.id.textViewTime);
-       // textViewBambuWork =findViewById(R.id.textViewBambuWork);
-
+        String path = Environment.getExternalStorageDirectory().toString()+DIR_BAMBU_LOGS;
+        scanFilesBambuLogs(new File(path));
 
 
-
-
-
-
-        int x =0;
-/*
-        String s = textViewTime.getText().toString();
-        textViewTime.setText(bambuHashMap.get("hour_min_sec_ms").getString());
-        textViewBambuWork.setText(bambuHashMap.get("gcode_state").getString());
-*/
     }
 
     private HashMap<String, ValueBambu> getHashMapBanbuLastLog(String date_y_m_d, String subStr) {
@@ -197,12 +188,10 @@ public class ValueBambuActivity extends AppCompatActivity {
 
                      indexFileMinSize = files.length-1;
 
-
                      min = files[indexFileMinSize].length();
                     for (int i = indexFileMinSize; i > 0; i--) {
 
                         size2 = files[i-1].length();
-
                         if( min > size2 ){
                             min = size2;
                             indexFileMinSize = i-1;
@@ -212,7 +201,7 @@ public class ValueBambuActivity extends AppCompatActivity {
 
                      sizeFile = (int) files[indexFileMinSize].length();
                      bytes = new byte[sizeFile];
-                     IndexsGoodBytes = new int[sizeFile];
+                     IndexsGoodBytes = new int[sizeFile];//Индексы хороших байтов массива bytes(хорошие байты это символы без отриц.значений и '/n' '/r')
 
 
 
@@ -238,10 +227,6 @@ public class ValueBambuActivity extends AppCompatActivity {
                             bytesGood[i] = bytes[IndexsGoodBytes[i]];
                         }
 
-
-
-
-                        String string1 = new String(bytes);
                         String string = new String(bytesGood);
 
                         //Убираем лишние пробелы
@@ -252,12 +237,19 @@ public class ValueBambuActivity extends AppCompatActivity {
 
                         //Ищем с конца строку лога с полезной инфой
                         int indexStartStrLastLog = string.lastIndexOf("Pushing Status");
-                        int indexEndStrLastLog = string.lastIndexOf("ams");
-                        String subStr = string.substring(indexStartStrLastLog,indexEndStrLastLog);
+                        int indexEndStrLastLog = string.indexOf("s_obj",indexStartStrLastLog);
+                        Log.d(LOG_TAG, "indexStartStrLastLog: "+  indexStartStrLastLog);
+                        Log.d(LOG_TAG, "indexEndStrLastLog: "+  indexEndStrLastLog);
 
-                        bambuHashMap = getHashMapBanbuLastLog("2024-09-07",subStr);
+                        if((indexStartStrLastLog !=-1) && (indexEndStrLastLog !=-1)){
+                            String subStr = string.substring(indexStartStrLastLog,indexEndStrLastLog);
+                            Log.d(LOG_TAG, "subStr: "+  subStr);
+                            bambuHashMap = getHashMapBanbuLastLog("2024-09-07",subStr);
+                        } else subStringIsNormal = false;
 
-                        int x =0;
+
+
+
 
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
@@ -270,17 +262,18 @@ public class ValueBambuActivity extends AppCompatActivity {
                         @Override
                         public void run() {
 
-                            //Запуск на основном потоке
-                            for (int i = 0; i < keys.length; i++) {
+                            if(subStringIsNormal){
+                                //Запуск на основном потоке
+                                for (int i = 0; i < keys.length; i++) {
 
-                                TextView textView = textViews[i];
-                                //String s = textView.getText().toString();
-                                textView.setText(keys[i] + ": " + bambuHashMap.get(keys[i]).getString());
+                                    //String s = textView.getText().toString();
+                                    textViews[i].setText(keys[i] + ": " + bambuHashMap.get(keys[i]).getString());
+                                }
+
+                                textViewTest.setText(String.valueOf(counter));
+                                textViewTemp.setText((String.valueOf(sizeFile)));
+                                textViewTemp2.setText(fileMinSize);
                             }
-
-                            textViewTest.setText(String.valueOf(counter));
-                            textViewTemp.setText((String.valueOf(sizeFile)));
-                            textViewTemp2.setText(fileMinSize);
                         }
                     });
                     try {
@@ -297,5 +290,46 @@ public class ValueBambuActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         is_started = false;
+    }
+
+    private void addNotification() {
+        // Builds your notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setContentTitle("My Bambu Notification")
+                .setContentText("RepeatBambu");
+
+        // Creates the intent needed to show the notification
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(contentIntent);
+
+        // Add as notification
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify(0, builder.build());
+    }
+
+    public void onClickButtonNotification(View view) throws InterruptedException {
+
+        Intent intentBambu = getPackageManager().getLaunchIntentForPackage("bbl.intl.bambulab.com");
+        Intent intentMain = getPackageManager().getLaunchIntentForPackage("com.example.mybambuhandy");
+
+        PendingIntent pendingIntentBambu = PendingIntent.getActivity(ValueBambuActivity.this,0,intentBambu, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntentMain = PendingIntent.getActivity(ValueBambuActivity.this,0,intentMain, PendingIntent.FLAG_IMMUTABLE);
+
+        try{
+            pendingIntentBambu.send();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        addNotification();
+
+        //Thread.sleep(26000);
+        try{
+            //pendingIntentMain.send();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }
